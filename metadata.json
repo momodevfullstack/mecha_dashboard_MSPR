@@ -1,0 +1,5 @@
+{
+  "name": "MECHA - Control Tower",
+  "description": "Tableau de bord industriel pour la surveillance et la prédiction des machines de production.",
+  "requestFramePermissions": []
+}
