@@ -22,7 +22,9 @@ async function startServer() {
       const temperature = isAlert ? 85 + Math.random() * 15 : 60 + Math.random() * 20;
       const maintenanceScore = isAlert ? Math.floor(Math.random() * 40) : 60 + Math.floor(Math.random() * 40);
       const productionSpeed = 80 + Math.random() * 40;
+      const cycleTime = 3600 / productionSpeed; // seconds per piece
       const powerConsumption = 20 + Math.random() * 10;
+      const dailyEnergy = powerConsumption * 24; // kWh per day
       const co2Emissions = powerConsumption * 0.4;
       const operators = ["Jean D.", "Marie L.", "Carlos S.", "Ana B.", "Luc P.", "Sophie T."];
       const operator = operators[Math.floor(Math.random() * operators.length)];
@@ -41,7 +43,9 @@ async function startServer() {
         temperature: Number(temperature.toFixed(1)),
         maintenanceScore,
         productionSpeed: Number(productionSpeed.toFixed(0)),
+        cycleTime: Number(cycleTime.toFixed(1)),
         powerConsumption: Number(powerConsumption.toFixed(1)),
+        dailyEnergy: Number(dailyEnergy.toFixed(1)),
         co2Emissions: Number(co2Emissions.toFixed(1)),
         operator,
         x,
@@ -52,6 +56,7 @@ async function startServer() {
     // Calculate Global KPIs
     const totalProduction = machines.reduce((sum, m) => sum + m.productionSpeed, 0);
     const avgProduction = totalProduction / machines.length;
+    const avgCycleTime = machines.reduce((sum, m) => sum + m.cycleTime, 0) / machines.length;
     const avgScrapRate = machines.reduce((sum, m) => sum + m.defectRate, 0) / machines.length;
     const machinesAtRisk = machines.filter(m => m.status === "ALERTE").length;
     const avgPower = machines.reduce((sum, m) => sum + m.powerConsumption, 0) / machines.length;
@@ -72,7 +77,8 @@ async function startServer() {
     const errorTempByMachine = machines.map(m => ({
       machineId: m.id,
       errorRate: m.defectRate,
-      temperature: m.temperature
+      temperature: m.temperature,
+      dailyEnergy: m.dailyEnergy
     }));
 
     // Maintenance Heatmap (mocking 7 days for a subset of machines to keep it readable, e.g., first 10)
@@ -146,6 +152,7 @@ async function startServer() {
     res.json({
       kpis: {
         avgProduction: Number(avgProduction.toFixed(0)),
+        avgCycleTime: Number(avgCycleTime.toFixed(1)),
         avgScrapRate: Number(avgScrapRate.toFixed(2)),
         machinesAtRisk,
         avgPower: Number(avgPower.toFixed(1)),

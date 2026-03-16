@@ -6,7 +6,9 @@ export interface Machine {
   temperature: number;
   maintenanceScore: number;
   productionSpeed: number;
+  cycleTime: number;
   powerConsumption: number;
+  dailyEnergy: number;
   co2Emissions: number;
   operator: string;
   x: number;
@@ -15,6 +17,7 @@ export interface Machine {
 
 export interface KPIs {
   avgProduction: number;
+  avgCycleTime: number;
   avgScrapRate: number;
   machinesAtRisk: number;
   avgPower: number;
@@ -36,6 +39,7 @@ export interface ErrorTempByMachine {
   machineId: string;
   errorRate: number;
   temperature: number;
+  dailyEnergy: number;
 }
 
 export interface MaintenanceHeatmap {

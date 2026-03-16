@@ -25,6 +25,7 @@ export function useDashboardData() {
             if (machines.length > 0) {
               const totalProduction = machines.reduce((sum, m) => sum + m.productionSpeed, 0);
               result.kpis.avgProduction = Number((totalProduction / machines.length).toFixed(0));
+              result.kpis.avgCycleTime = Number((machines.reduce((sum, m) => sum + m.cycleTime, 0) / machines.length).toFixed(1));
               result.kpis.avgScrapRate = Number((machines.reduce((sum, m) => sum + m.defectRate, 0) / machines.length).toFixed(2));
               result.kpis.machinesAtRisk = machines.filter(m => m.status === "ALERTE").length;
               result.kpis.avgPower = Number((machines.reduce((sum, m) => sum + m.powerConsumption, 0) / machines.length).toFixed(1));

@@ -1,6 +1,6 @@
 import React from "react";
 import { useDashboardData } from "../hooks/useDashboardData";
-import { Zap, Leaf, DollarSign, AlertTriangle } from "lucide-react";
+import { Zap, Leaf, DollarSign, AlertTriangle, Battery } from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -9,6 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  BarChart,
+  Bar,
 } from "recharts";
 
 export function EnergyView() {
@@ -31,7 +33,7 @@ export function EnergyView() {
     );
   }
 
-  const { energyTrend } = data.charts;
+  const { energyTrend, errorTempByMachine } = data.charts;
   const { totalCO2, estimatedCost, avgPower } = data.kpis;
 
   return (
@@ -67,7 +69,7 @@ export function EnergyView() {
         </div>
       </div>
 
-      {/* Charts */}
+      {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="text-base font-semibold text-slate-800 mb-6 flex items-center gap-2">
@@ -117,6 +119,30 @@ export function EnergyView() {
                 />
                 <Area type="monotone" dataKey="co2" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorCO2)" name="CO2" />
               </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Row 2 */}
+      <div className="grid grid-cols-1 gap-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 className="text-base font-semibold text-slate-800 mb-6 flex items-center gap-2">
+            <Battery className="w-5 h-5 text-indigo-500" />
+            Consommation Énergétique par Machine (kWh/jour)
+          </h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={errorTempByMachine} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="machineId" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 10 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
+                <Tooltip
+                  cursor={{ fill: "#f1f5f9" }}
+                  contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                />
+                <Bar dataKey="dailyEnergy" fill="#6366f1" radius={[4, 4, 0, 0]} name="Énergie (kWh)" />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

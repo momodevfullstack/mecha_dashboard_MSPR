@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Factory, TrendingUp, Bell, Zap, Users, Map, Download, Radio } from "lucide-react";
+import { LayoutDashboard, Factory, TrendingUp, Bell, Zap, Users, Map, Download, Radio, Clock } from "lucide-react";
 import { cn } from "../utils/cn";
 import { NotificationSystem } from "./NotificationSystem";
 import { useDashboardData } from "../hooks/useDashboardData";
@@ -10,6 +10,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { data } = useDashboardData();
   const { isLiveMode, setIsLiveMode, selectedPlant, setSelectedPlant } = useAppContext();
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const navItems = [
     { path: "/", label: "Direction Générale", icon: LayoutDashboard },
@@ -82,10 +88,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
             
             {/* Global Filters & Controls */}
             <div className="flex items-center gap-3 border-r border-slate-200 pr-4">
+              <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                <Clock className="w-4 h-4" />
+                <span>
+                  {currentTime.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </span>
+                <span className="font-mono font-medium text-slate-700 ml-1">
+                  {currentTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </span>
+              </div>
+
               <select 
                 value={selectedPlant}
                 onChange={(e) => setSelectedPlant(e.target.value)}
-                className="text-sm border-slate-200 rounded-lg text-slate-600 focus:ring-indigo-500 focus:border-indigo-500"
+                className="hidden text-sm border-slate-200 rounded-lg text-slate-600 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="All">Toutes les usines</option>
                 <option value="France">France</option>

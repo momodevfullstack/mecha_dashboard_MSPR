@@ -2,7 +2,7 @@ import React from "react";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { useAppContext } from "../context/AppContext";
 import { KPICard } from "../components/KPICard";
-import { Activity, AlertTriangle, Zap, Package } from "lucide-react";
+import { Activity, AlertTriangle, Zap, Package, Timer } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -21,6 +21,19 @@ import {
 import { cn } from "../utils/cn";
 
 const COLORS = ["#10b981", "#f43f5e", "#f59e0b", "#3b82f6"];
+
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, value, name }: any) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="text-xs font-bold">
+      {`${(percent * 100).toFixed(0)}% (${value})`}
+    </text>
+  );
+};
 
 export function GeneralView() {
   const { data, loading, error } = useDashboardData();
@@ -69,10 +82,11 @@ export function GeneralView() {
           valueClassName={kpis.avgScrapRate > 3 ? "text-rose-600" : "text-emerald-600"}
         />
         <KPICard
-          title="Machines à Risque"
-          value={kpis.machinesAtRisk}
-          icon={AlertTriangle}
-          valueClassName={kpis.machinesAtRisk > 0 ? "text-rose-600" : "text-emerald-600"}
+          title="Temps de Cycle Moyen"
+          value={`${kpis.avgCycleTime} s`}
+          icon={Timer}
+          trend={{ value: 0.2, isPositive: true }}
+          valueClassName="text-indigo-600"
         />
         <KPICard
           title="Conso. Énergétique"
@@ -113,8 +127,10 @@ export function GeneralView() {
                   data={pieData}
                   cx="50%"
                   cy="50%"
+                  labelLine={false}
+                  label={renderCustomizedLabel}
                   innerRadius={60}
-                  outerRadius={80}
+                  outerRadius={100}
                   paddingAngle={5}
                   dataKey="value"
                 >
@@ -124,6 +140,7 @@ export function GeneralView() {
                 </Pie>
                 <Tooltip
                   contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                  formatter={(value: number, name: string, props: any) => [`${value} machines`, name]}
                 />
                 <Legend verticalAlign="bottom" height={36} iconType="circle" />
               </PieChart>
@@ -166,13 +183,18 @@ export function GeneralView() {
                   <div key={i} className="text-xs font-medium text-slate-500 text-center">J-{7 - i}</div>
                 ))}
               </div>
-              {charts.maintenanceHeatmap.map((row) => (
+              {charts.maintenanceHeatmap.map((row) => {
+                const isAtRisk = data.machines.find(m => m.id === row.machineId)?.status === "ALERTE";
+                return (
                 <div 
                   key={row.machineId} 
                   onClick={() => setSelectedMachineId(row.machineId)}
                   className="grid grid-cols-8 gap-1 mb-1 items-center cursor-pointer hover:bg-slate-50 rounded-md p-1 transition-colors"
                 >
-                  <div className="text-xs font-medium text-slate-700">{row.machineId}</div>
+                  <div className="text-xs font-medium text-slate-700 flex items-center gap-1">
+                    {isAtRisk && <AlertTriangle className="w-3 h-3 text-rose-500" />}
+                    <span className={cn(isAtRisk && "text-rose-600 font-semibold")}>{row.machineId}</span>
+                  </div>
                   {Array.from({ length: 7 }).map((_, i) => {
                     const val = row[`day${i + 1}`] as number;
                     // Color logic: < 50 red, 50-80 yellow, > 80 green
@@ -191,7 +213,7 @@ export function GeneralView() {
                     );
                   })}
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </div>
