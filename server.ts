@@ -127,6 +127,53 @@ async function startServer() {
       }
     });
 
+    // Predictive Maintenance (XGBoost/Random Forest simulation)
+    const machinePredictions = machines.filter(m => m.status === "ALERTE").map(m => {
+      const failureProbability = Math.min(99, Math.max(50, m.temperature - 20 + Math.random() * 10));
+      return {
+        machineId: m.id,
+        failureProbability: Number(failureProbability.toFixed(1)),
+        anomalyScore: Number((Math.random() * 10).toFixed(1)),
+        topFeatures: [
+          { name: "Température", contribution: Number((40 + Math.random() * 30).toFixed(1)) },
+          { name: "Vibrations", contribution: Number((20 + Math.random() * 20).toFixed(1)) },
+          { name: "Conso. Électrique", contribution: Number((10 + Math.random() * 15).toFixed(1)) }
+        ]
+      };
+    }).sort((a, b) => b.failureProbability - a.failureProbability);
+
+    // Anomaly Detection (Isolation Forest simulation)
+    const anomalyData = Array.from({ length: 50 }, (_, i) => {
+      const time = `-${50 - i}m`;
+      const isAnomaly = Math.random() > 0.95;
+      const basePower = 1200;
+      const baseTemp = 65;
+      
+      return {
+        time,
+        power: isAnomaly ? basePower + 400 + Math.random() * 200 : basePower + Math.random() * 100 - 50,
+        temperature: isAnomaly ? baseTemp + 25 + Math.random() * 10 : baseTemp + Math.random() * 5 - 2.5,
+        isAnomaly
+      };
+    });
+
+    // Quality Drift (Predictive Quality)
+    const qualityDrift = Array.from({ length: 24 }, (_, i) => {
+      const time = `${i.toString().padStart(2, "0")}:00`;
+      const baseRate = 2.0;
+      const upperLimit = 4.0;
+      const lowerLimit = 1.0;
+      const noise = Math.random() * 0.8 - 0.4;
+      // Exponential drift simulation
+      const drift = i > 12 ? Math.pow(1.15, i - 12) - 1 : 0;
+      
+      if (i < 12) {
+        return { time, defectRate: Number((baseRate + noise).toFixed(2)), predictedDrift: Number((baseRate + noise).toFixed(2)), upperLimit, lowerLimit };
+      } else {
+        return { time, defectRate: null, predictedDrift: Number((baseRate + noise + drift).toFixed(2)), upperLimit, lowerLimit };
+      }
+    });
+
     // Energy Trend (mocking 24 hours of data)
     const energyTrend = Array.from({ length: 24 }, (_, i) => {
       const time = `${i.toString().padStart(2, "0")}:00`;
@@ -166,6 +213,9 @@ async function startServer() {
         maintenanceHeatmap,
         defectRatePrediction,
         trsPrediction,
+        machinePredictions,
+        anomalyData,
+        qualityDrift,
         energyTrend
       },
       machines,

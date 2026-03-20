@@ -59,6 +59,28 @@ export interface TRSPrediction {
   predicted: number;
 }
 
+export interface MachinePrediction {
+  machineId: string;
+  failureProbability: number;
+  anomalyScore: number;
+  topFeatures: { name: string; contribution: number }[];
+}
+
+export interface AnomalyData {
+  time: string;
+  power: number;
+  temperature: number;
+  isAnomaly: boolean;
+}
+
+export interface QualityDrift {
+  time: string;
+  defectRate: number | null;
+  predictedDrift: number;
+  upperLimit: number;
+  lowerLimit: number;
+}
+
 export interface EnergyTrend {
   time: string;
   power: number;
@@ -80,6 +102,9 @@ export interface ChartsData {
   maintenanceHeatmap: MaintenanceHeatmap[];
   defectRatePrediction: DefectRatePrediction[];
   trsPrediction: TRSPrediction[];
+  machinePredictions: MachinePrediction[];
+  anomalyData: AnomalyData[];
+  qualityDrift: QualityDrift[];
   energyTrend: EnergyTrend[];
 }
 
